@@ -656,7 +656,7 @@ def setup_parser():
 
   parser.add_argument("--target", type=str, default="rv32imc",
                       help="Run the generator with pre-defined targets: \
-                            rv32imc, rv32i, rv64imc, rv64gc")
+                            rv32imc, rv32i, rv32ima, rv64imc, rv64gc, rv64imac")
   parser.add_argument("-o", "--output", type=str,
                       help="Output directory name", dest="o")
   parser.add_argument("-tl", "--testlist", type=str, default="",
@@ -774,6 +774,15 @@ def load_config(args, cwd):
     if args.target == "rv32imc":
       args.mabi = "ilp32"
       args.isa  = "rv32imc"
+    elif args.target == "rv32imac":
+      args.mabi = "ilp32"
+      args.isa  = "rv32imac"
+    elif args.target == "rv32ima":
+      args.mabi = "ilp32"
+      args.isa  = "rv32ima"
+    elif args.target == "rv32gc":
+      args.mabi = "ilp32"
+      args.isa  = "rv32gc"
     elif args.target == "multi_harts":
       args.mabi = "ilp32"
       args.isa  = "rv32gc"
@@ -789,6 +798,9 @@ def load_config(args, cwd):
     elif args.target == "rv64gc":
       args.mabi = "lp64"
       args.isa  = "rv64gc"
+    elif args.target == "rv64imac":
+      args.mabi = "lp64"
+      args.isa = "rv64imac"
     elif args.target == "rv64gcv":
       args.mabi = "lp64"
       args.isa  = "rv64gcv"
