@@ -596,7 +596,6 @@ def iss_cmp(test_list, iss, output_dir, stop_on_first_error, exp, debug_cmd):
   if len(iss_list) != 2:
     return
   report = ("%s/iss_regr.log" % output_dir).rstrip()
-  run_cmd("rm -rf %s" % report)
   for test in test_list:
     for i in range(0, test['iterations']):
       elf = ("%s/asm_tests/%s_%d.o" % (output_dir, test['test'], i))
@@ -817,7 +816,7 @@ def main():
     # Load configuration from the command line and the configuration file.
     cfg = load_config(args, cwd)
     # Create output directory
-    output_dir = create_output(args.o, args.noclean)
+    output_dir = create_output(args.o, args.noclean, cwd+"/out_")
 
     if args.verilog_style_check:
       logging.debug("Run style check")
