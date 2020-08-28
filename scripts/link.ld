@@ -19,15 +19,17 @@ ENTRY(_start)
 SECTIONS
 {
   . = 0x80000000;
-  .text : { *(.text) }
+  .text.init : { *(.text.init) }
   . = ALIGN(0x1000);
   .tohost : { *(.tohost) }
   . = ALIGN(0x1000);
+  .text : { *(.text) }
+  . = ALIGN(0x1000);
   .page_table : { *(.page_table) }
-  .data : { *(.data) }
   .user_stack : { *(.user_stack) }
   .kernel_data : { *(.kernel_data) }
   .kernel_stack : { *(.kernel_stack) }
+  .data : { *(.data) }
   .bss : { *(.bss) }
   _end = .;
 }
