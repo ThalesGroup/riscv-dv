@@ -230,6 +230,8 @@ def process_regression_list(testlist, test, iterations, matched_list, riscv_dv_r
         if (iterations > 0 and  entry['iterations'] > 0):
           entry['iterations'] = iterations
         if entry['iterations'] > 0:
+          entry['asm_tests'] = re.sub("\<path_var\>", get_env_var(entry['path_var']), entry['asm_tests'])
+          entry['gcc_opts'] = re.sub("\<path_var\>", get_env_var(entry['path_var']), entry['gcc_opts'])
           logging.info("Found matched tests: %s, iterations:%0d" %
                       (entry['test'], entry['iterations']))
           matched_list.append(entry)
