@@ -23,6 +23,7 @@ import sys
 import logging
 
 from scripts.lib import *
+from scripts.verilator_log_to_trace_csv import *
 from scripts.spike_log_to_trace_csv import *
 from scripts.ovpsim_log_to_trace_csv import *
 from scripts.whisper_log_trace_csv import *
@@ -621,6 +622,8 @@ def compare_iss_log(iss_list, log_list, report, stop_on_first_error=0, exp=False
       csv_list.append(csv)
       if iss == "spike":
         process_spike_sim_log(log, csv)
+      elif "verilator" in iss or "vsim" in iss:
+        process_verilator_sim_log(log, csv)
       elif iss == "ovpsim":
         process_ovpsim_sim_log(log, csv, stop_on_first_error)
       elif iss == "sail":
