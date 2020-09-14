@@ -115,8 +115,11 @@ def read_verilator_trace(path, full_trace):
   # are in state INSTR.
 
   end_trampoline_re = re.compile(r'core.*: 0x0000000080000000 ')
+  start_debug_it_re = re.compile(r'core.*: 0x0000000000000800 ')
+  stop_debug_it_re  = re.compile(r'core.*: 0x0000000000000890 ')
 
   in_trampoline = True
+  in_debug = False
   instr = None
 
   with open(path, 'r') as handle:
@@ -126,6 +129,16 @@ def read_verilator_trace(path, full_trace):
         if end_trampoline_re.match(line):
           in_trampoline = False
         continue
+
+      if not in_trampoline:
+        if in_debug:
+          if stop_debug_it_re.match(line):
+            in_debug = False
+          continue
+        else:
+          if start_debug_it_re.match(line):
+            in_debug = True
+            continue
 
       if instr is None:
         # The INSTR state. We expect to see a line matching CORE_RE. We'll
