@@ -643,6 +643,10 @@ def save_regr_report(report):
   summary = ("%s PASSED, %s FAILED" % (passed_cnt, failed_cnt))
   logging.info(summary)
   run_cmd(("echo %s >> %s" % (summary, report)))
+  if failed_cnt != "0":
+    failed_details = run_cmd("sed -e 's,.*_sim/,,' %s | grep '\(csv\|matched\)' | uniq | sed -e 'N;s/\\n/ /g' | grep '\[FAILED\]'" % report).strip()
+    logging.info(failed_details)
+    run_cmd(("echo %s >> %s" % (failed_details, report)))
   logging.info("ISS regression report is saved to %s" % report)
 
 
