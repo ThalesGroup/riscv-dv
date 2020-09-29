@@ -638,8 +638,8 @@ def compare_iss_log(iss_list, log_list, report, stop_on_first_error=0, exp=False
 
 
 def save_regr_report(report):
-  passed_cnt = run_cmd("grep PASSED %s | wc -l" % report).strip()
-  failed_cnt = run_cmd("grep FAILED %s | wc -l" % report).strip()
+  passed_cnt = run_cmd("grep '\[PASSED\]' %s | wc -l" % report).strip()
+  failed_cnt = run_cmd("grep '\[FAILED\]' %s | wc -l" % report).strip()
   summary = ("%s PASSED, %s FAILED" % (passed_cnt, failed_cnt))
   logging.info(summary)
   run_cmd(("echo %s >> %s" % (summary, report)))
