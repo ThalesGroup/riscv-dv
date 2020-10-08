@@ -20,7 +20,7 @@
 - iss: verilator
   path_var: RTL_PATH
   cmd: >
-    make -C <path_var> generate-trace-verilator elf-bin=<elf>
+    make -C <path_var> generate-trace-verilator elf-bin=<elf> variant=<variant>
 
 - iss: vsim
   path_var: RTL_PATH
