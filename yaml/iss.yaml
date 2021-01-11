@@ -22,10 +22,20 @@
   cmd: >
     make -C <path_var> generate-trace-verilator elf-bin=<elf> variant=<variant>
 
+- iss: verilator-gate
+  path_var: RTL_PATH
+  cmd: >
+    make -C <path_var> generate-trace-verilator elf-bin=<elf> variant=<variant> gate=1
+
 - iss: vsim
   path_var: RTL_PATH
   cmd: >
     make -C <path_var> generate-trace-vsim preload=<elf> elf-bin=none
+
+- iss: vsim-gate
+  path_var: RTL_PATH
+  cmd: >
+    make -C <path_var> generate-trace-vsim preload=<elf> elf-bin=none gate=1
 
 - iss: ovpsim
   path_var: OVPSIM_PATH
