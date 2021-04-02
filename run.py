@@ -454,6 +454,57 @@ def run_assembly_from_dir(asm_test_dir, iss_yaml, isa, mabi, gcc_opts, iss,
   else:
     logging.error("No assembly test(*.S) found under %s" % asm_test_dir)
 
+# python3 run.py --target rv64gc --iss=spike,verilator --elf_tests bbl.o
+def run_elf(c_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
+          setting_dir, debug_cmd):
+  """Run a directed c test with ISS
+
+  Args:
+    c_test      : C test file
+    iss_yaml    : ISS configuration file in YAML format
+    isa         : ISA variant passed to the ISS
+    mabi        : MABI variant passed to GCC
+    gcc_opts    : User-defined options for GCC compilation
+    iss_opts    : Instruction set simulators
+    output_dir  : Output directory of compiled test files
+    setting_dir : Generator setting directory
+    debug_cmd   : Produce the debug cmd log without running
+  """
+  if not c_test.endswith(".o"):
+    logging.error("%s is not a .o file" % c_test)
+    return
+  cwd = os.path.dirname(os.path.realpath(__file__))
+  c_test = os.path.expanduser(c_test)
+  report = ("%s/iss_regr.log" % output_dir).rstrip()
+  c = re.sub(r"^.*\/", "", c_test)
+  c = re.sub(r"\.o$", "", c)
+  prefix = ("%s/directed_elf_tests/%s"  % (output_dir, c))
+  elf = prefix + ".o"
+  binary = prefix + ".bin"
+  iss_list = iss_opts.split(",")
+  run_cmd("mkdir -p %s/directed_elf_tests" % output_dir, 600, debug_cmd=debug_cmd)
+  logging.info("Copy elf test : %s" % c_test)
+  run_cmd("cp %s %s/directed_elf_tests" % (c_test, output_dir))
+  # Convert the ELF to plain binary, used in RTL sim
+  logging.info("Converting to %s" % binary)
+  cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf, binary))
+  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+  log_list = []
+  # ISS simulation
+  for iss in iss_list:
+    run_cmd("mkdir -p %s/%s_sim" % (output_dir, iss))
+    log = ("%s/%s_sim/%s.log" % (output_dir, iss, c))
+    log_list.append(log)
+    base_cmd = parse_iss_yaml(iss, iss_yaml, isa, setting_dir, debug_cmd)
+    logging.info("[%0s] Running ISS simulation: %s" % (iss, elf))
+    cmd = get_iss_cmd(base_cmd, elf, log)
+    if "verilator" in iss: ratio = 35
+    else: ratio = 1
+    run_cmd(cmd, 0.2*ratio, debug_cmd = debug_cmd)
+    logging.info("[%0s] Running ISS simulation: %s ...done" % (iss, elf))
+  if len(iss_list) == 2:
+    compare_iss_log(iss_list, log_list, report)
+
 
 def run_c(c_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
           setting_dir, debug_cmd):
@@ -737,6 +788,8 @@ def setup_parser():
                       help="Directed assembly tests")
   parser.add_argument("--c_tests", type=str, default="",
                       help="Directed c tests")
+  parser.add_argument("--elf_tests", type=str, default="",
+                      help="Directed elf tests")
   parser.add_argument("--log_suffix", type=str, default="",
                       help="Simulation log name suffix")
   parser.add_argument("--exp", action="store_true", default=False,
@@ -886,6 +939,20 @@ def main():
         # path_c_test is a c file
         elif os.path.isfile(full_path) or args.debug:
           run_c(full_path, args.iss_yaml, args.isa, args.mabi, args.gcc_opts,
+                args.iss, output_dir, args.core_setting_dir, args.debug)
+        else:
+          logging.error('%s does not exist' % full_path)
+          sys.exit(RET_FAIL)
+      return
+
+    # Run any handcoded/directed elf tests specified by args.elf_tests
+    if args.elf_tests != "":
+      elf_test = args.elf_tests.split(',')
+      for path_elf_test in elf_test:
+        full_path = os.path.expanduser(path_elf_test)
+        # path_elf_test is an elf file
+        if os.path.isfile(full_path) or args.debug:
+          run_elf(full_path, args.iss_yaml, args.isa, args.mabi, args.gcc_opts,
                 args.iss, output_dir, args.core_setting_dir, args.debug)
         else:
           logging.error('%s does not exist' % full_path)
