@@ -37,6 +37,11 @@
   cmd: >
     make -C <path_var> generate-trace-vsim preload=<elf> elf-bin=none gate=1
 
+- iss: vcs
+  path_var: RTL_PATH
+  cmd: >
+    make -C <path_var> vcs elf-bin=<elf> variant=<variant>
+
 - iss: ovpsim
   path_var: OVPSIM_PATH
   cmd: >

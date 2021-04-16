@@ -622,7 +622,15 @@ def compare_iss_log(iss_list, log_list, report, stop_on_first_error=0, exp=False
       csv_list.append(csv)
       if iss == "spike":
         process_spike_sim_log(log, csv)
-      elif "verilator" in iss or "vsim" in iss:
+      elif "veri" in iss or "vsim" in iss or "vcs" in iss:
+        cmd = ("mv %s %s.simulator" % (log, log))
+        run_cmd(cmd)
+        if "vcs" in iss:
+            cmd = ("cp ../../../core-v-cores/cva6/trace_rvfi_hart_00.dasm .")
+            run_cmd(cmd)
+        cmd = ("$SPIKE_PATH/spike-dasm < trace_rvfi_hart_00.dasm > %s" % log)
+        logging.info("[%0s] Execute spike-dasm in %s" % (iss, log))
+        run_cmd(cmd)
         process_verilator_sim_log(log, csv)
       elif iss == "ovpsim":
         process_ovpsim_sim_log(log, csv, stop_on_first_error)
