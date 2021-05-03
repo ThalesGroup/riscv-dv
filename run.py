@@ -114,6 +114,10 @@ def parse_iss_yaml(iss, iss_yaml, isa, setting_dir, debug_cmd):
           cmd = re.sub("\<variant\>", variant, cmd)
       else:
         cmd = re.sub("\<variant\>", isa, cmd)
+      if "verilator" in iss:
+        cmd0 = ("make -C $RTL_PATH verilate variant=%s" % isa)
+        logging.info("[%0s] Execute make verilate variant=%s" % (iss, isa))
+        run_cmd(cmd0)
       return cmd
   logging.error("Cannot find ISS %0s" % iss)
   sys.exit(RET_FAIL)

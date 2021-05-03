@@ -20,7 +20,7 @@
 - iss: verilator
   path_var: RTL_PATH
   cmd: >
-    make -C <path_var> generate-trace-verilator elf-bin=<elf> variant=<variant>
+    <path_var>/work-ver/Variane_testharness <elf>
 
 - iss: verilator-gate
   path_var: RTL_PATH
