@@ -114,9 +114,13 @@ def parse_iss_yaml(iss, iss_yaml, isa, setting_dir, debug_cmd):
           cmd = re.sub("\<variant\>", variant, cmd)
       else:
         cmd = re.sub("\<variant\>", isa, cmd)
-      if "verilator" in iss:
+      if "testharness" in iss:
         cmd0 = ("make -C $RTL_PATH verilate variant=%s" % isa)
         logging.info("[%0s] Execute make verilate variant=%s" % (iss, isa))
+        run_cmd(cmd0)
+      if "uvm" in iss:
+        cmd0 = ("make -C $RTL_PATH/core/example_tb/ veri_comp variant=%s" % isa)
+        logging.info("[%0s] Execute make veri_comp variant=%s" % (iss, isa))
         run_cmd(cmd0)
       return cmd
   logging.error("Cannot find ISS %0s" % iss)
@@ -314,6 +318,16 @@ def gen(test_list, cfg, output_dir, cwd):
                 argv.batch_size, output_dir, argv.verbose, check_return_code, argv.debug)
 
 
+# Convert the ELF to plain binary, used in RTL sim
+def elf2bin(elf, binary, debug_cmd):
+  logging.info("Converting to %s" % binary)
+  cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf, binary))
+  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+  logging.info("Converting to Mem_init.txt")
+  cmd = ("%s -O verilog --change-addresses -0x80000000 %s Mem_init.txt" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf))
+  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+
+
 def gcc_compile(test_list, output_dir, isa, mabi, opts, debug_cmd):
   """Use riscv gcc toolchain to compile the assembly program
 
@@ -358,11 +372,7 @@ def gcc_compile(test_list, output_dir, isa, mabi, opts, debug_cmd):
         cmd += (" -mabi=%s" % mabi)
       logging.info("Compiling %s" % asm)
       run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
-      # Convert the ELF to plain binary, used in RTL sim
-      logging.info("Converting to %s" % binary)
-      cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd),
-             elf, binary))
-      run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+      elf2bin(elf, binary, debug_cmd)
 
 
 def run_assembly(asm_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
@@ -406,10 +416,7 @@ def run_assembly(asm_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
   cmd += (" -march=%s" % isa)
   cmd += (" -mabi=%s" % mabi)
   run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
-  # Convert the ELF to plain binary, used in RTL sim
-  logging.info("Converting to %s" % binary)
-  cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf, binary))
-  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+  elf2bin(elf, binary, debug_cmd)
   log_list = []
   # ISS simulation
   for iss in iss_list:
@@ -485,10 +492,7 @@ def run_elf(c_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
   run_cmd("mkdir -p %s/directed_elf_tests" % output_dir, 600, debug_cmd=debug_cmd)
   logging.info("Copy elf test : %s" % c_test)
   run_cmd("cp %s %s/directed_elf_tests" % (c_test, output_dir))
-  # Convert the ELF to plain binary, used in RTL sim
-  logging.info("Converting to %s" % binary)
-  cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf, binary))
-  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+  elf2bin(elf, binary, debug_cmd)
   log_list = []
   # ISS simulation
   for iss in iss_list:
@@ -498,7 +502,7 @@ def run_elf(c_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
     base_cmd = parse_iss_yaml(iss, iss_yaml, isa, setting_dir, debug_cmd)
     logging.info("[%0s] Running ISS simulation: %s" % (iss, elf))
     cmd = get_iss_cmd(base_cmd, elf, log)
-    if "verilator" in iss: ratio = 35
+    if "veri" in iss: ratio = 35
     else: ratio = 1
     run_cmd(cmd, 0.2*ratio, debug_cmd = debug_cmd)
     logging.info("[%0s] Running ISS simulation: %s ...done" % (iss, elf))
@@ -546,10 +550,7 @@ def run_c(c_test, iss_yaml, isa, mabi, gcc_opts, iss_opts, output_dir,
   cmd += (" -march=%s" % isa)
   cmd += (" -mabi=%s" % mabi)
   run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
-  # Convert the ELF to plain binary, used in RTL sim
-  logging.info("Converting to %s" % binary)
-  cmd = ("%s -O binary %s %s" % (get_env_var("RISCV_OBJCOPY", debug_cmd = debug_cmd), elf, binary))
-  run_cmd_output(cmd.split(), debug_cmd = debug_cmd)
+  elf2bin(elf, binary, debug_cmd)
   log_list = []
   # ISS simulation
   for iss in iss_list:
