@@ -119,7 +119,7 @@ def parse_iss_yaml(iss, iss_yaml, isa, setting_dir, debug_cmd):
         logging.info("[%0s] Execute make verilate variant=%s" % (iss, isa))
         run_cmd(cmd0)
       if "uvm" in iss:
-        cmd0 = ("make -C $RTL_PATH/core/example_tb/ veri_comp variant=%s" % isa)
+        cmd0 = ("make -C $TB_PATH veri_comp variant=%s" % isa)
         logging.info("[%0s] Execute make veri_comp variant=%s" % (iss, isa))
         run_cmd(cmd0)
       return cmd

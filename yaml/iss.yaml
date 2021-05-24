@@ -23,9 +23,9 @@
     <path_var>/work-ver/Variane_testharness <elf>
 
 - iss: veri-uvm
-  path_var: RTL_PATH
+  path_var: TB_PATH
   cmd: >
-    <path_var>/core/example_tb/verilator_work/Vcva6_core_only_tb
+    <path_var>/verilator_work/Vcva6_core_only_tb
 
 - iss: veri-gate
   path_var: RTL_PATH
